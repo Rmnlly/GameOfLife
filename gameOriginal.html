@@ -1,0 +1,201 @@
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Game Of Life</title>
+
+<script src="https://d309knd7es5f10.cloudfront.net/createjs.min.js"></script>
+<script>
+	var zon = true; // set to false to turn off console messages from zim
+	var zns = false; // set to true to require zim namespace - eg. new zim.Frame()
+</script>
+<script src="https://d309knd7es5f10.cloudfront.net/zim_6.8.0.js"></script>
+
+<script>
+
+var scaling = "fit";
+var width = 1024;
+var height = 768;
+
+var frame = new Frame(scaling, width, height);
+frame.on("ready", function() {
+    console.log("You can mouse over the grid to bring cells to life near other cells....");
+
+    var stage = frame.stage;
+    var stageW = frame.width;
+    var stageH = frame.height;
+    frame.outerColor = "#444";
+    frame.color = "#ddd";
+
+    let gridHeight = 50;
+    let gridWidth = 50;
+    let cellSize = 10;
+    let theGrid = createArray(gridWidth);
+    let workingGrid = createArray(gridWidth);
+    let genCount = 0;
+
+    let cont = new Container(550, 550)
+      .centerReg(stage)
+      .outline();
+    let cellFill = new Rectangle({
+      height:cellSize,
+      width:cellSize,
+      color:'#000'
+    });
+    let cellBlank = new Rectangle({
+      height:cellSize,
+      width:cellSize,
+      color:'#fff'
+    });
+
+    var generationsLabel = new Label({
+       text:"Generations: "+genCount,
+       size:50,
+       font:"courier",
+       color:"black",
+       fontOptions:"italic bold"
+    })
+      .addTo(stage)
+      .pos(500, 700);
+
+    randomFill();
+
+    // makeGrid();
+    // stage.update();
+
+    interval(30, function(){
+        makeGrid();
+        updateGrid();
+        stage.update();
+    });
+
+    function createArray(rows) {
+	    let arr = [];
+	    for (let i = 0; i < rows; i++) {
+	        arr[i] = []; //Putting an array into each element of our intial array to simulate a 2-D array
+	    }
+	    return arr;
+	  }
+
+    function randomFill(){
+      for(let i = 5; i < gridHeight - 5; i++){
+        for(let j = 5; j < gridWidth - 5; j++){
+          theGrid[i][j] = Math.round(Math.random());
+        }
+      }
+    }
+
+    function makeGrid(){
+      let livingCount = 0;
+      cont.removeAllChildren();
+      for(let j = 1; j < gridHeight; j++){
+        for(let k = 1; k < gridWidth; k++){
+          if(theGrid[j][k] === 1){
+            let cellCont = new Container({
+              height:cellSize,
+              width:cellSize
+            })
+              .addTo(cont)
+              .pos(j+j*cellSize, k+k*cellSize);
+
+            cellCont.posx = k;
+            cellCont.posy = j;
+
+            let livingCell = cellFill.clone()
+              .centerReg(cellCont);
+
+            livingCount++;
+          } else {
+            let cellCont = new Container({
+              height: cellSize,
+              width: cellSize
+            })
+              .addTo(cont)
+              .pos(j+j*cellSize, k+k*cellSize);
+
+            cellCont.posx = k;
+            cellCont.posy = j;
+
+            let deadCell = cellBlank.clone()
+              .centerReg(cellCont);
+
+            //The users mouse going over the dead squares does nothing normally but if they go around or near the alive ones then it will spark life back into the game
+
+            cellCont.on("mouseover", function(e){
+              theGrid[j][k]=1;
+              updateGrid();
+              //makeGrid();
+              stage.update();
+            });
+          }
+        }
+      }
+      console.log(livingCount);
+      genCount++;
+      generationsLabel.text="Generations: "+genCount;
+    }
+
+    function updateGrid(){
+      for(let j = 1; j < gridHeight - 1; j++){
+        for(let k = 1; k < gridWidth - 1; k++){
+          let totalCells = 0;
+
+          totalCells += theGrid[j - 1][k - 1]; //top left
+          totalCells += theGrid[j - 1][k]; //top center
+          totalCells += theGrid[j - 1][k + 1]; //top right
+
+          totalCells += theGrid[j][k - 1]; //middle left
+          totalCells += theGrid[j][k + 1]; //middle right
+
+          totalCells += theGrid[j + 1][k - 1]; //bottom left
+          totalCells += theGrid[j + 1][k]; //bottom center
+          totalCells += theGrid[j + 1][k + 1]; //bottom right
+
+          switch (totalCells) {
+              case 2:
+                  workingGrid[j][k] = theGrid[j][k]; //No change in situation
+                  //Here we copy over the current cells state to the working array
+                  break;
+              case 3:
+                  workingGrid[j][k] = 1; //comes to life
+                  //This time we make the current cell alive in the working array
+                  break;
+              default:
+                  workingGrid[j][k] = 0; // dies
+                  //Here the current cell is dead in the working array
+          }
+        }
+      }
+
+      for (var l = 1; l < gridHeight - 1; l++) { //iterate through rows
+        //top and bottom
+        workingGrid[l][0] = workingGrid[l][gridHeight - 3];
+        workingGrid[l][gridHeight - 2] = workingGrid[l][1];
+        //left and right
+        workingGrid[0][l] = workingGrid[gridHeight - 3][l];
+        workingGrid[gridHeight - 2][l] = workingGrid[1][l];
+
+      }
+
+      //Here we swap the grids, making a temp variable to hold the currently displayed grid
+      //Then we make the currently displaying grid equal to the working grid
+      //Finally we make the working grid equal to the old displayed grid
+
+      var temp = theGrid;
+      theGrid = workingGrid;
+      workingGrid = temp;
+    }
+
+}); // end of ready
+
+</script>
+
+<meta name="viewport" content="width=device-width, user-scalable=no" />
+
+</head>
+
+<body>
+<!-- canvas with id="myCanvas" is made by zim Frame -->
+</body>
+</html>
