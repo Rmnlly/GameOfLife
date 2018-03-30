@@ -36,8 +36,7 @@ frame.on("ready", function() {
     let genCount = 0;
 
     let cont = new Container(550, 550)
-      .centerReg(stage)
-      .outline();
+      .centerReg(stage);
     let cellFill = new Rectangle({
       height:cellSize,
       width:cellSize,
@@ -49,7 +48,7 @@ frame.on("ready", function() {
       color:'#fff'
     });
 
-    var generationsLabel = new Label({
+	var generationsLabel = new Label({
        text:"Generations: "+genCount,
        size:50,
        font:"courier",
@@ -58,6 +57,15 @@ frame.on("ready", function() {
     })
       .addTo(stage)
       .pos(500, 700);
+    var title = new Label({
+       text:"Conways Game Of Life",
+       size:40,
+       font:"courier",
+       color:"black",
+       fontOptions:"italic bold"
+    })
+      .centerReg(stage)
+      .pos(stageW/2, 50);
 
     randomFill();
 
