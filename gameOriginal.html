@@ -20,8 +20,6 @@ var height = 768;
 
 var frame = new Frame(scaling, width, height);
 frame.on("ready", function() {
-    console.log("You can mouse over the grid to bring cells to life near other cells....");
-
     var stage = frame.stage;
     var stageW = frame.width;
     var stageH = frame.height;
@@ -139,7 +137,6 @@ frame.on("ready", function() {
           }
         }
       }
-      console.log(livingCount);
       genCount++;
       generationsLabel.text="Generations: "+genCount;
     }
